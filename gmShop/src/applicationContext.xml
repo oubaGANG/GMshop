@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:p="http://www.springframework.org/schema/p" xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+		http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+		http://www.springframework.org/schema/context 
+		http://www.springframework.org/schema/context/spring-context-4.3.xsd
+		http://www.springframework.org/schema/mvc
+		http://www.springframework.org/schema/mvc/spring-mvc-4.3.xsd
+		http://www.springframework.org/schema/aop 
+		http://www.springframework.org/schema/aop/spring-aop-4.3.xsd 
+		http://www.springframework.org/schema/tx 
+		http://www.springframework.org/schema/tx/spring-tx-4.3.xsd">
+		
+	<!--支持基于注解的配置方式，为@Autowired、@Resource、@PostConstruct、@PreDestroy注解提供支持 -->
+	<context:annotation-config />
+
+	<!--支持annotation实现aop，并允许为没有实现接口的类实现切面 -->
+	<aop:aspectj-autoproxy proxy-target-class="true" />
+	
+	<!-- 配置数据源 -->
+	<bean id="dataSource" destroy-method="close"
+		class="com.mchange.v2.c3p0.ComboPooledDataSource">
+		<!--连接数据库的驱动类 -->
+		<property name="driverClass" value="com.mysql.jdbc.Driver"></property>
+		<!--连接数据库的url -->
+		<property name="jdbcUrl" value="jdbc:mysql:///gmshop"></property>
+		<!--连接数据库的用户名 -->
+		<property name="user" value="root"></property>
+		<!--连接数据库的密码 -->
+		<property name="password" value="123"></property>
+		<!--连接池的最大连接数 -->
+		<property name="maxPoolSize" value="40"></property>
+		<!--连接池的最小连接数 -->
+		<property name="minPoolSize" value="1"></property>
+		<!--初始化连接数 -->
+		<property name="initialPoolSize" value="1"></property>
+		<!--连接的最大空闲时间，超时的连接将被丢弃，单位：秒 -->
+		<property name="maxIdleTime" value="60"></property>
+		<!--没有连接可用时，等待连接的时间，单位：毫秒 -->
+		<property name="checkoutTimeout" value="2000"></property>
+	</bean>
+	
+	<!-- 配置sessionFactory -->
+	<bean id="sessionFactory"
+		class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="hibernateProperties">
+			<props>
+				<!-- Hibernate方言 -->
+				<prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
+				<!-- 是否在控制台打印SQL语句 -->
+				<prop key="hibernate.show_sql">true</prop>
+				<!-- spring和hibernate整合时自动生成数据库的表 -->
+				<prop key="hibernate.hbm2ddl.auto">update</prop>
+				<!--是否收集有助于性能调节的统计数据 -->
+				<prop key="hibernate.generate_statistics">true</prop>
+				<!-- 通过getCurrentSession创建的session会绑定到当前线程 -->
+				<prop key="hibernate.current_session_context_class">thread</prop>
+				<!-- 设置使用二级缓存 -->
+				<prop key="hibernate.cache.use_second_level_cache">true</prop>
+				<!-- 设置二级缓存类 -->
+				<prop key="hibernate.cache.provider_class">
+					net.sf.ehcache.hibernate.EhCacheProvider
+				</prop>
+				<!-- 设置二级缓存工厂类 -->
+				<prop key="hibernate.cache.region.factory_class">  
+     				org.hibernate.cache.ehcache.SingletonEhCacheRegionFactory  
+				</prop>
+				<!-- spring管理session事务 -->   
+				<prop key="hibernate.current_session_context_class">  
+     				org.springframework.orm.hibernate4.SpringSessionContext  
+				</prop>
+				<!-- 是否使用查询缓存 -->
+				<prop key="hibernate.cache.use_query_cache">true</prop>
+				<!-- 指定数据库的隔离级别 -->
+				<prop key="hibernate.connection.isolation">2</prop>
+			</props>
+		</property>
+
+		<!-- 实现实体类映射 -->
+
+		<property name="mappingResources">
+			<list>
+				<value>com/guimei/domain/User.hbm.xml</value>
+				<value>com/guimei/domain/Adminuser.hbm.xml</value>
+				<value>com/guimei/domain/Category.hbm.xml</value>
+				<value>com/guimei/domain/Categorysecond.hbm.xml</value>
+				<value>com/guimei/domain/Orderitem.hbm.xml</value>
+				<value>com/guimei/domain/Orders.hbm.xml</value>
+				<value>com/guimei/domain/Product.hbm.xml</value>
+			</list>
+		</property>
+	
+	
+	</bean>
+	
+	<!-- 配置HibernateTemplate -->
+	<bean id="hibernateTemplate" class="org.springframework.orm.hibernate4.HibernateTemplate">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+		<!--配置事务管理类 -->
+	<bean id="txManager"
+		class="org.springframework.orm.hibernate4.HibernateTransactionManager">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+
+	<!--设置事务属性 -->
+	<tx:advice id="txAdvice" transaction-manager="txManager">
+		<tx:attributes>
+			<tx:method name="*" /><!--所有方法均加入事务处理 -->
+			<tx:method name="search*" read-only="true" /><!--匹配search*的方法的事务设置为只读 -->
+			<tx:method name="get*" propagation="NEVER" /><!--避免属性的getter加入事务处理,匹配多个tx:method的方法以后面这个为准 -->
+			<tx:method name="set*" propagation="NEVER" /><!--避免属性的setter加入事务处理,匹配多个tx:method的方法以后面这个为准 -->
+		</tx:attributes>
+	</tx:advice>
+	<!--设置切面 -->
+	<aop:config>
+		<aop:pointcut expression="execution(public * com.guimei.service.imp..*(..))"
+			id="service" />
+		<aop:advisor advice-ref="txAdvice" pointcut-ref="service" />
+	</aop:config>
+	
+	<!--为baseDaoImpl注入hibernateTemplate -->
+	<bean id="baseDao" class="org.springframework.orm.hibernate4.BaseDaoImpl"
+		abstract="true">
+		<property name="hibernateTemplate" ref="hibernateTemplate" />
+	</bean>
+	
+	<!--所有dao对象，注意dao需要继承baseDao ############################# -->
+		<bean id="userDao" class="com.guimei.dao.imp.UserDaoImp" parent="baseDao"></bean>		
+		<bean id="categoryDao" class="com.guimei.dao.imp.CategoryDaoImp" parent="baseDao"></bean>
+		<bean id="productDao" class="com.guimei.dao.imp.ProductDaoImp" parent="baseDao"></bean>			
+		<bean id="categorysecondDao" class="com.guimei.dao.imp.CategorysecondDaoImp" parent="baseDao"></bean>	
+		<bean id="adminDao" class="com.guimei.dao.imp.AdminDaoImp" parent="baseDao"></bean>		
+		<bean id="ordersDao" class="com.guimei.dao.imp.OrdersDaoImp" parent="baseDao"></bean>	
+		 <bean id="orderitemDao" class="com.guimei.dao.imp.OrderitemDaoImpl" parent="baseDao"></bean>
+	<!--所有service对象#####################################， -->
+	
+		<bean id="userService" class="com.guimei.service.imp.UserServiceImp" >
+			<property name="userDao" ref="userDao"/>
+		</bean>
+		<bean id="adminService" class="com.guimei.service.imp.AdminServiceImp" >
+			<property name="adminDao" ref="adminDao"/>
+		</bean>
+		<bean id="categoryService" class="com.guimei.service.imp.CategoryServiceImp">
+			<property name="categoryDao" ref="categoryDao"/>
+		</bean>
+		<bean id="productService" class="com.guimei.service.imp.ProductServiceImp">
+			<property name="productDao" ref="productDao"/>
+		</bean>
+		
+		<bean id="categorysecondService" class="com.guimei.service.imp.CategorysecondServiceImp">
+			<property name="categorysecondDao" ref="categorysecondDao"/>
+		</bean>
+
+		<bean id="ordersService" class="com.guimei.service.imp.OrdersServiceImp">
+			<property name="ordersDao" ref="ordersDao"/>
+		</bean>
+		<bean id="orderitemService" class="com.guimei.service.imp.OrderitemServiceImpl">
+			<property name="orderitemDao" ref="orderitemDao"/>
+		</bean>
+	<!--所有action对象，##################################################### -->
+		<bean id="userAction" class="com.guimei.action.UserAction" scope="prototype">
+			<property name="userService" ref="userService"/>
+		</bean>	
+	<!-- 首页访问的Action -->
+		<bean id="indexAction" class="com.guimei.action.IndexAction" scope="prototype">
+			<property name="categoryService" ref="categoryService"/>
+			<property name="productService" ref="productService"/>
+		</bean>
+		
+		
+		
+			
+	<!-- 		后台action                              -->
+	<!-- 管理员 -->
+		<bean id="adminManageAction" class="com.guimei.action.adminManageAction" scope="prototype">
+			<property name="adminService" ref="adminService"/>
+		</bean>	
+	<!-- 用户 -->
+		<bean id="uMAnageAction" class="com.guimei.action.uMAnageAction" scope="prototype">
+			<property name="userService" ref="userService"/>
+		</bean>	
+	<!-- 	一级菜单   -->
+		<bean id="firManageAction" class="com.guimei.action.firManageAction" scope="prototype">
+			<property name="categoryService" ref="categoryService"/>
+		</bean>	
+	<!-- 	二级菜单   -->	
+		<bean id="secManageAction" class="com.guimei.action.secManageAction" scope="prototype">
+			<property name="categorysecondService" ref="categorysecondService"/>
+			<property name="categoryService" ref="categoryService"/>
+		</bean>	
+	<!-- 	商品   -->	
+		<bean id="proManageAction" class="com.guimei.action.proManageAction" scope="prototype">
+			<property name="productService" ref="productService"/>
+		</bean>	
+	<!-- 	账单   -->	
+		<bean id="dinManageAction" class="com.guimei.action.dinManageAction" scope="prototype">
+			<property name="userService" ref="userService"/>
+			<property name="ordersService" ref="ordersService"/>
+		</bean>	
+		
+		
+	<!--          前台ying             -->
+		<bean id="proByPageAction" class="com.guimei.action.proManageAction" scope="prototype">
+			<property name="productService" ref="productService"/>
+		</bean>
+	<!-- 用户商品的Action -->
+		<bean id="product" class="com.guimei.action.ProductAction" scope="prototype">
+			<property name="productService" ref="productService"/>
+		</bean>
+		
+		<!-- 前台订单项Action -->
+		<bean id="orderitemAction" class="com.guimei.action.OrderitemAction" scope="prototype">
+			<property name="orderitemService" ref="orderitemService"/>
+		</bean>
+		<!-- 前台订单Action -->
+		<bean id="orderAction" class="com.guimei.action.OrderAction" scope="prototype">
+			<property name="orderService" ref="orderService"/>
+			<property name="orderitemService" ref="orderitemService"/>
+		</bean>
+		<!-- 退出系统Action -->
+		<bean id="exitAction" class="com.guimei.action.ExitAction" scope="prototype">
+		</bean>
+</beans>
+
+ 

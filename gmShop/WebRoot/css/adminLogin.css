@@ -1,0 +1,36 @@
+body { font:12px/20px 宋体; background:#fff; }
+body,ul,li,p,form,dl,dt,dd,input { margin:0; padding:0; }
+ul { list-style:none; }
+img { border:0; }
+table { border-collapse:collapse; }
+
+.clearfix:after { content:"."; display:block; visibility:hidden; height:0; overflow:hidden; clear:both; }
+.clearfix { _zoom:1; }
+.input-text {
+	border:0;
+	padding:4px 8px;
+	font-size:16px;
+	background:url(../images/input_bg.png) no-repeat;
+}
+.input-button {
+	border:0;
+	font-size:14px;
+	font-weight:bold;
+	padding:6px 16px;
+	background:url(../images/button_bg.png) no-repeat;
+	color:#fff;
+	overflow:visible;
+}
+
+
+
+.blue-style{ background:#3379b7 url(../images/login_bg.jpg) left top repeat-x; }
+#login { width:950px; margin:0 auto; padding-top:176px; }
+#login .icon { float:left; background:url(../images/login_icon.jpg); width:322px; height:398px; _margin-right:-3px; }
+#login .login-box { margin-left:322px; _margin-left:319px; background:url(../images/login_box.jpg); width:612px; height:398px; }
+#login .login-box form { padding-top:180px; margin-left:160px; width:410px; }
+#login .login-box form dl dt { float:left; width:70px; line-height:46px; height:46px; font-size:16px; font-weight:bold; color:#fff; }
+#login .login-box form dl dd { margin-left:70px; height:46px; }
+#login .login-box form dl dd input { margin:10px 0; width:200px; }
+#login .login-box .buttons { text-align:right; margin-top:30px; }
+#login .login-box .buttons input { margin-left:26px; }

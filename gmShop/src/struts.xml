@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+	"-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+	"http://struts.apache.org/dtds/struts-2.3.dtd">
+
+<struts>
+
+	<constant name="struts.enable.DynamicMethodInvocation" value="true" />
+	<constant name="struts.devMode" value="true" />
+
+	<package name="default" namespace="/" extends="struts-default">
+			<!-- 配置首页访问的Action -->
+		<action name="index" class="indexAction">
+			<result name="index">/user/index.jsp</result>
+		</action>
+			
+				<!-- 用户的Action -->
+			<action name="user_*" method="{1}" class="userAction">
+				<result name="loginFalse">/user/login.jsp</result>
+				<result name="loginSucc" type="redirectAction">index</result>
+				<result name="registSucc">/user/register_success.htm</result>
+			</action>
+			
+			
+				<!-- 后台管理的用户的Action -->
+			<action name="uManage_*" class="uMAnageAction" method="{1}">	</action>
+			<!-- 后台管理的管理员的Action -->
+			<action name="adminManage_*" class="adminManageAction" method="{1}">
+				<result name="loginFalse">/AdminLogin.jsp</result>
+				<result name="quit">/AdminLogin.jsp</result>
+				<result name="loginSucc">/manager/main.jsp</result>
+			</action>
+
+			<!-- 后台管理的一级菜单的Action -->
+			<action name="firManage_*" class="firManageAction" method="{1}">	</action>
+
+			<!-- 后台管理的2级菜单的Action -->
+
+			<action name="secManage_*" class="secManageAction" method="{1}">	</action>
+
+			<!-- 后台管理的商品的Action -->
+			<action name="proManage_*" class="proManageAction" method="{1}">
+				<result name="findSucc">/manager/proEdit.jsp</result>
+			</action>
+
+		<!-- 后台管理的订单的Action -->
+				<action name="dinManage_*" class="dinManageAction" method="{1}">	</action>
+			
+			<!--               ying             -->
+			<!--前台根据一、二级菜单查找商品并分页显示  -->
+			<action name="product_*" method="{1}" class="proByPageAction">	
+				<result name="success">/user/productList1.jsp</result>		
+				<result name="findSucc">/user/product.jsp</result>	
+				<result name="findByPid">/user/cart.jsp</result>
+				<result name="gologin">/user/login.jsp</result>
+				<result name="del">/user/cart.jsp</result>
+			</action>
+			<!-- 前台订单Action -->
+			<action name="orderAction_*" class="orderAction" method="{1}">
+
+					<result name="show">/user/order.jsp</result>
+
+					<result name="findAll">/user/order.jsp</result>
+
+				<result name="pay">/user/paySuccess.jsp</result>
+
+					<result name="selectAll">/user/orderList.jsp</result>
+
+					<result name="delete" type="redirectAction">orderAction_selectAll</result>
+
+			</action>
+
+		<!-- 前台订单项Action -->
+
+		<action name="orderitemAction_*" class="orderitemAction" method="{1}">
+
+					<result name="del" type="chain">orderAction_findAll</result>
+
+		</action>
+
+		<!-- 退出系统 -->
+
+
+
+		<action name="exitAction_*" class="exitAction" method="{1}">
+
+				<result name="exit" type="redirect">/user/login.jsp</result>
+
+		</action>
+	</package>
+
+</struts>

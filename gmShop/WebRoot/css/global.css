@@ -1,0 +1,18 @@
+﻿body{font:normal 12px Tahoma,宋体;}
+body,ul,ol,tr,dl,dd,form,input,h1 {margin:0px;padding:0px;}
+a {color:#333;text-decoration: none;}    
+#container a:hover {color:#ff7300;} 		
+a img{border:0px;}	
+li{list-style:none;}
+input{border:1px #ccc solid;height:17px;width:131px;}
+label.error{
+    color: red;
+}
+div.zoomDiv{position:absolute;top:0px;left:380px;width:550px;z-index:999;display: none;
+    height:300px;border:1px solid #CCCCCC;text-align:center;overflow:hidden;}
+div.zoomDiv img{position:absolute; transform-origin:top left;transform: scale(3)}
+/*放大镜*/
+div.zoomMask{position:absolute;width:150px;height:150px;cursor:move;z-index:1; background: #ffffcc;top: 0;
+    border: 1px solid #ccc;display: none;
+    filter: alpha(opacity=50);
+    opacity: 0.5;}
